@@ -1,7 +1,6 @@
 import type { NextRequest } from "next/server";
 import { notFound } from "next/navigation";
-import { db, apps, systemProfiles } from "@/lib/drizzle";
-import { eq } from "drizzle-orm";
+import { getApp, insertSystemProfile } from "@/lib/actions";
 
 export async function GET(
   req: NextRequest,
@@ -11,36 +10,31 @@ export async function GET(
     params: { slug: string };
   }
 ) {
-  const app = await db.query.apps.findFirst({
-    where: eq(apps.slug, params.slug.split(".")[0]),
-    with: {
-      versions: {
-        orderBy: (versions, { desc }) => [desc(versions.version)],
-      },
-    },
-  });
+  const app = await getApp(params.slug.split(".")[0]);
 
   if (!app) {
     notFound();
   }
 
   const searchParams = req.nextUrl.searchParams;
-  const cpu64Bit = searchParams.get("cpu64bit") === "1";
-  const nCpu = parseInt(searchParams.get("ncpu") || "0");
 
-  // await db.insert(systemProfiles).values({
-  //   appId: app.id,
-  //   appVersion: searchParams.get("version"),
-  //   cpu64Bit,
-  //   ncpu: nCpu,
-  //   cpuFreqMhz: searchParams.get("cpuFreqMhz"),
-  //   cputype: searchParams.get("cpuType"),
-  //   cpusubtype: searchParams.get("cpuSubType"),
-  //   model: searchParams.get("model"),
-  //   ramMb: searchParams.get("ramMb"),
-  //   osVersion: searchParams.get("osVersion"),
-  //   lang: searchParams.get("lang"),
-  // });
+  await insertSystemProfile({
+    appId: app.id,
+    appVersion: searchParams.get("version"),
+    cpu64Bit: searchParams.get("cpu64Bit")
+      ? searchParams.get("cpu64bit") === "1"
+      : null,
+    ncpu: searchParams.get("ncpu")
+      ? parseInt(searchParams.get("ncpu") || "0")
+      : null,
+    cpuFreqMhz: searchParams.get("cpuFreqMhz"),
+    cputype: searchParams.get("cpuType"),
+    cpusubtype: searchParams.get("cpuSubType"),
+    model: searchParams.get("model"),
+    ramMb: searchParams.get("ramMb"),
+    osVersion: searchParams.get("osVersion"),
+    lang: searchParams.get("lang"),
+  });
 
   const versions = app.versions.map(
     (version) => `<item>

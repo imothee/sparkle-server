@@ -33,12 +33,10 @@ export const versions = pgTable(
     edSignature: varchar("ed_signature", { length: 255 }),
     length: varchar("length", { length: 255 }),
     appId: bigint("app_id", { mode: "bigint" }).references(() => apps.id),
-    insertedAt: timestamp("inserted_at", { mode: "string" })
+    insertedAt: timestamp("inserted_at", { mode: "date" })
       .notNull()
       .defaultNow(),
-    updatedAt: timestamp("updated_at", { mode: "string" })
-      .notNull()
-      .defaultNow(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
   },
   (table) => {
     return {
@@ -61,9 +59,7 @@ export const systemProfiles = pgTable("system_profiles", {
   ramMb: varchar("ram_mb", { length: 255 }),
   osVersion: varchar("os_version", { length: 255 }),
   lang: varchar("lang", { length: 255 }),
-  insertedAt: timestamp("inserted_at", { mode: "string" })
-    .notNull()
-    .defaultNow(),
+  insertedAt: timestamp("inserted_at", { mode: "date" }).notNull().defaultNow(),
 });
 
 export const apps = pgTable(
@@ -73,12 +69,10 @@ export const apps = pgTable(
     name: varchar("name", { length: 255 }),
     slug: varchar("slug", { length: 255 }),
     description: varchar("description", { length: 255 }),
-    insertedAt: timestamp("inserted_at", { mode: "string" })
+    insertedAt: timestamp("inserted_at", { mode: "date" })
       .notNull()
       .defaultNow(),
-    updatedAt: timestamp("updated_at", { mode: "string" })
-      .notNull()
-      .defaultNow(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
     details: text("details"),
     imageIcon: bytea("image_icon"),
     imageOne: bytea("image_one"),
@@ -97,16 +91,14 @@ export const systemProfileSummaries = pgTable(
   {
     id: bigserial("id", { mode: "bigint" }).primaryKey().notNull(),
     period: varchar("period", { length: 255 }),
-    dateStart: timestamp("date_start", { mode: "string" }),
-    dateEnd: timestamp("date_end", { mode: "string" }),
+    dateStart: timestamp("date_start", { mode: "date" }),
+    dateEnd: timestamp("date_end", { mode: "date" }),
     counts: jsonb("counts"),
     appId: bigint("app_id", { mode: "bigint" }).references(() => apps.id),
-    insertedAt: timestamp("inserted_at", { mode: "string" })
+    insertedAt: timestamp("inserted_at", { mode: "date" })
       .notNull()
       .defaultNow(),
-    updatedAt: timestamp("updated_at", { mode: "string" })
-      .notNull()
-      .defaultNow(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
   },
   (table) => {
     return {
