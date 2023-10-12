@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { DateTime } from "luxon";
 import {
-  deleteSystemProfilesBefore,
+  deleteSystemProfilesIn,
   getAppSystemProfileSummary,
   getAppSystemProfilesBetween,
   getApps,
@@ -54,13 +54,8 @@ const countField = (
   }
 };
 
-export async function GET() {
-  const now = DateTime.utc();
-  const start = now.startOf("week");
-  const end = now.endOf("week");
-
+const summarizeProfilesBetween = async (start: DateTime, end: DateTime) => {
   console.log(start.toISO(), end.toISO());
-
   const apps = await getApps();
 
   for (const app of apps) {
@@ -113,7 +108,19 @@ export async function GET() {
       });
     }
 
-    await deleteSystemProfilesBefore(app.id, end.toJSDate());
+    if (profiles.length > 0) {
+      await deleteSystemProfilesIn(profiles.map((p) => p.id));
+    }
+  }
+};
+
+export async function GET() {
+  for (const weeksAgo of [0, 1]) {
+    const now = DateTime.utc().minus({ weeks: weeksAgo });
+    const start = now.startOf("week");
+    const end = now.endOf("week");
+
+    await summarizeProfilesBetween(start, end);
   }
 
   return NextResponse.json({ message: `Done` }, { status: 200 });

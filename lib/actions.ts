@@ -4,7 +4,7 @@ import {
   systemProfiles,
   systemProfileSummaries,
 } from "@/lib/drizzle";
-import { eq, and, gte, lt } from "drizzle-orm";
+import { eq, and, gte, lt, inArray } from "drizzle-orm";
 import type { App, SystemProfile, SystemProfileSummary } from "@/lib/drizzle";
 
 export const getApp = async (slug: string) => {
@@ -32,6 +32,12 @@ export const deleteSystemProfilesBefore = async (appId: bigint, end: Date) => {
     .where(
       and(eq(systemProfiles.appId, appId), lt(systemProfiles.insertedAt, end))
     );
+};
+
+export const deleteSystemProfilesIn = async (systemProfilesIds: bigint[]) => {
+  return db
+    .delete(systemProfiles)
+    .where(inArray(systemProfiles.id, systemProfilesIds));
 };
 
 export const getAppSystemProfilesBetween = async (

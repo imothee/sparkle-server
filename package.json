@@ -14,6 +14,7 @@
     "drizzle-orm": "^0.28.6",
     "luxon": "^3.4.3",
     "next": "13.5.4",
+    "next-auth": "^4.23.2",
     "react": "^18",
     "react-dom": "^18"
   },
