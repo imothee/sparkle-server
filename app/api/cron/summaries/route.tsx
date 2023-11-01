@@ -55,8 +55,9 @@ const countField = (
 };
 
 const summarizeProfilesBetween = async (start: DateTime, end: DateTime) => {
-  console.log(start.toISO(), end.toISO());
   const apps = await getApps();
+
+  const summaries: Record<string, number> = {};
 
   for (const app of apps) {
     const profiles = await getAppSystemProfilesBetween(
@@ -108,20 +109,27 @@ const summarizeProfilesBetween = async (start: DateTime, end: DateTime) => {
       });
     }
 
+    summaries[app.id.toString()] = profiles.length;
+
     if (profiles.length > 0) {
       await deleteSystemProfilesIn(profiles.map((p) => p.id));
     }
   }
+
+  return summaries;
 };
 
 export async function GET() {
-  for (const weeksAgo of [0, 1]) {
-    const now = DateTime.utc().minus({ weeks: weeksAgo });
-    const start = now.startOf("week");
-    const end = now.endOf("week");
+  const summaries = await Promise.all(
+    [0, 1].map(async (weeksAgo) => {
+      const now = DateTime.utc().minus({ weeks: weeksAgo });
+      const start = now.startOf("week");
+      const end = now.endOf("week");
 
-    await summarizeProfilesBetween(start, end);
-  }
+      const results = await summarizeProfilesBetween(start, end);
+      return { start: start.toISO(), end: end.toISO(), results };
+    })
+  );
 
-  return NextResponse.json({ message: `Done` }, { status: 200 });
+  return NextResponse.json({ summaries }, { status: 200 });
 }
