@@ -119,6 +119,8 @@ const summarizeProfilesBetween = async (start: DateTime, end: DateTime) => {
   return summaries;
 };
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   const summaries = await Promise.all(
     [0, 1].map(async (weeksAgo) => {
