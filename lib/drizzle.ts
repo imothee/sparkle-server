@@ -8,8 +8,8 @@ import {
 } from "./schema";
 
 import { InferSelectModel, InferInsertModel } from "drizzle-orm";
-import { sql } from "@vercel/postgres";
-import { drizzle } from "drizzle-orm/vercel-postgres";
+import { drizzle, PostgresJsDatabase } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 
 export {
   apps,
@@ -27,7 +27,15 @@ export type SystemProfileSummary = InferInsertModel<
 >;
 export type Version = InferInsertModel<typeof versions>;
 
-export const db = drizzle(sql, {
+const client = postgres({
+  host: process.env.PG_HOST,
+  port: Number(process.env.PG_PORT),
+  database: process.env.PG_DB,
+  username: process.env.PG_USER,
+  password: process.env.PG_PASSWORD,
+  ssl: { rejectUnauthorized: false },
+});
+export const db = drizzle(client, {
   schema: {
     apps,
     appsRelations,
